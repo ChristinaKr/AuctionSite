@@ -1,0 +1,658 @@
+<!--A Design by W3layouts
+Author: W3layout
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE HTML>
+<html>
+<head>
+
+    <title>Bidly Auction House</title>
+    <link href="css/bootstrap.css" rel='stylesheet' type='text/css'/>
+    <!-- jQuery (necessary JavaScript plugins) -->
+    <script type='text/javascript' src="js/jquery-1.11.1.min.js"></script>
+    <!-- Custom Theme files -->
+    <link href="css/style.css" rel='stylesheet' type='text/css'/>
+    <!-- Custom Theme files -->
+
+    <!--//theme-style-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="keywords" content=""/>
+    <script type="application/x-javascript"> addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    } </script>
+    <link href='http://fonts.googleapis.com/css?family=Montserrat|Raleway:400,200,300,500,600,700,800,900,100'
+          rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Playfair+Display:400,700,900' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Aladin' rel='stylesheet' type='text/css'>
+
+    <!--responsive table-->
+    <script href="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script href="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script href="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <script href="https://cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
+    <script href="https://cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap.min.js"></script>
+
+    <script href="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script href="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
+
+    <!-- start menu -->
+    <link href="css/megamenu.css" rel="stylesheet" type="text/css" media="all"/>
+    <script type="text/javascript" src="js/megamenu.js"></script>
+    <!--<script>$(document).ready(function(){$(".megamenu").megamenu();});</script>-->
+    <script src="js/menu_jquery.js"></script>
+    <script src="js/simpleCart.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/bootstrap-flash-alert.min.js"></script>
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <!--jquery library-->
+    <script src="js/jquery-3.3.1.js"></script>
+    <!--<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+
+    <link href="css/form.css" rel="stylesheet" type="text/css" media="all"/>
+
+    <!--etalage-->
+    <link rel="stylesheet" href="css/etalage.css">
+    <script src="js/jquery.etalage.min.js"></script>
+    <script>
+        jQuery(document).ready(function ($) {
+
+            $('#etalage').etalage({
+                thumb_image_width: 300,
+                thumb_image_height: 400,
+                source_image_width: 900,
+                source_image_height: 1200,
+                show_hint: true,
+                click_callback: function (image_anchor, instance_id) {
+                    alert('Callback example:\nYou clicked on an image with the anchor: "' + image_anchor + '"\n(in Etalage instance: "' + instance_id + '")');
+                }
+            });
+
+        });
+    </script>
+
+</head>
+<body id="dashboardsite">
+
+<!--Header-->
+<div id="include"></div>
+    <script>
+        $(function () {
+            $("#include").load("navbar.html");
+        });
+    </script>
+    <!--end header-->
+
+
+<!--webpage body-->
+<!-- table source: https://codepen.io/SitePoint/pen/xbvWQv-->
+<div class="imageContainer">
+    <div class="container dashboardcontainer" style="margin-top: 3%">
+        <div class="row" id="tableLink">
+
+            <!--<button id="createAuctionBtn" type="button" class="btn btn-default" href="start-auction.html">Create Auction</button>-->
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    //'create Auction' button - forwarding functionality
+    $(document).on('click', "#createAuctionBtn", function () {
+        location.href = $('#createAuctionBtn').attr('href');
+    });
+
+
+    //retrieve the view param from URL
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)), sURLVariables = sPageURL.split('&'), sParameterName, i;
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+    };
+    var view = getUrlParameter('view');
+
+
+    //main functionality: based on use case inject tables with content into dashboard.html
+    $(function () {
+
+
+        //seller auctions
+        if (view === "seller") {
+            //create the Watchlist table
+            var tableHead = createSellerTable();
+            $("#tableLink").append(tableHead);
+
+            //retrieve itemID for all the seller's auctions
+            $.getJSON("http://52.232.32.194/api/Item/read.php?", function (data) {
+                records = data['records'];
+
+                if ("records" in data) {
+                    for (i = 0; i < records.length; i++) {
+
+                        if (records[i].SellerID === getUserID()) {
+
+                            //TODO: double check if working once code is running on server. See source: https://stackoverflow.com/questions/20035101/why-does-my-javascript-get-a-no-access-control-allow-origin-header-is-present
+                            var bids = 0;
+                            $.getJSON("http://52.232.32.194/api/Item/read_items.php?ItemID=" + records[i].ID, function (data) {
+                                //TODO: check if this correctly produces the # of bids
+                                bids = data['records'].length;
+                            });
+
+                            //src: https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format
+                            var t = records[i].AuctionEnd.split(/[- :]/);
+                            var date = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+                            //create and inject element into the table
+                            var buyerTableElement = fillSellerTable(records[i], date, bids)
+                            $(".sellerTable").append(buyerTableElement);
+                        }
+                    }
+                } else {
+                    //TODO: display appropriate message if none found!
+                    console.log("no items in watchlist");
+                    $("#tableLink").append("<p>You have not created any auctions yet</p>");
+                }
+            });
+
+
+
+        //buyer auctions
+        } else if (view === "buyer") {
+
+            //create the buyer table
+            var tableHead = createBuyerTable();
+            $("#tableLink").append(tableHead);
+
+            //retrieve all bids of a user, then loop through them
+            $.getJSON("http://52.232.32.194/api/User/read_items_bidded_on.php?ID="+getUserID(), function (dataUser) {
+                records = dataUser['records'];
+
+                if ("records" in dataUser) {
+
+                    console.log("records: ");
+                    console.log(records);
+
+                    for (i = 0; i < records.length; i++) {
+
+                        //if bought the item (if userID == buyerID) User/read_items_bidded_on.php    in specific itemID
+
+//                        console.log(records[i]);
+//                        console.log(getUserID());
+
+                        //if user successfully won an auction his ID will become BuyerID
+                        if (records[i].BuyerID === getUserID()) {
+
+                            $.getJSON("http://52.232.32.194/api/Feedback/read.php", function (dataFeedb) {
+                                var recordsFeedback = dataFeedb['records'];
+
+                                console.log(dataFeedb);
+                                console.log("recordsFeedback: "+recordsFeedback);
+
+                                //TODO: should check if there is some feedback at all [ "if('records' in data)" ]
+
+                                for (j = 0; j < recordsFeedback.length; j++) {
+
+                                    // if already rated (if itemID is in Feedback/read.php array) -> show rating
+                                    if (records[i].ID === recordsFeedback[j].ItemID) {
+
+                                        var tR = records[i].AuctionEnd.split(/[- :]/);
+                                        var dateR = new Date(Date.UTC(tR[0], tR[1] - 1, tR[2], tR[3], tR[4], tR[5]));
+
+                                        //injects row with prior rating
+                                        var buyerTableElementRating = fillBuyerTableRating(records[i], dateR);
+                                        $(".buyerTable").append(buyerTableElementRating);
+
+                                    } else {
+                                        //src: https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format
+                                        var t = records[i].AuctionEnd.split(/[- :]/);
+                                        var date = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+                                        //injects row with rating dropdown
+                                        var buyerTableElement = fillBuyerTable(records[i], date)
+                                        $(".buyerTable").append(buyerTableElement);
+                                    }
+                                }
+                            });
+                        } else {
+                            //DIDN'T BUY -> EITHER LOST OR STILL ONGOING
+
+
+
+
+
+                            console.log("//DIDN'T BUY -> EITHER LOST OR STILL ONGOING");
+                            //if records.AuctionEnd > now
+//                            if( records[i].AuctionEnd > new Date().getTime() ){
+//                                //LIVE AUCTION
+//
+//                            }else{
+//                                //LOST AUCTION
+//
+//                            }
+                        }
+                    }
+                }
+            });
+
+
+
+            //wachtlist
+        } else if (view === "watchlist") {
+
+            //create the Watchlist table
+            var tableHead = createWatchListTable();
+            $("#tableLink").append(tableHead);
+
+            //fill Watchlist table with data -> query db for correct data
+            var records = "";
+            $.getJSON("http://52.232.32.194/api/Watch/read_user.php?UserID=" + getUserID(), function (data) {
+                //returns the ItemIDs of a user's watched auctions
+                watchListRecords = data['records'];
+
+                if ("records" in data) {
+
+                    //create all row elements and append to table
+                    for (i = 0; i < watchListRecords.length; i++) {
+
+                        //retrieve itemID
+                        var itemID = watchListRecords[i].ItemID;
+
+                        //retrieve itemID for all the seller's auctions
+                        $.getJSON("http://52.232.32.194/api/Item/read_one.php?ID=" + itemID, function (data) {
+                            var bids = 0;
+
+                            //src: https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format
+                            var t = data.AuctionEnd.split(/[- :]/);
+                            var date = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+                            //create and inject element into the table
+                            var watchListElement = fillWatchList(data, date, bids);
+                            $("#watchListTable").append(watchListElement);
+                        });
+                    }
+                } else {
+                    //TODO: BROWSER DOESN'T ACCEPT THE ALERTS
+//                    $("#tableLink").append("<p>no items currently in your watchlist</p>");
+                    $.alert("You currently don't have any items in your Watchlist",{position: ['top-right'] ,autoClose: true, closeTime: 5000, type:'success'});
+                }
+            });
+
+//Admin overview table
+        } else if (view === "admin") {
+
+            //create the Watchlist table
+            var tableHead = createAdminOverview();
+            $("#tableLink").append(tableHead);
+
+            //fill Watchlist table with data -> query db for correct data
+            $.getJSON("http://52.232.32.194/api/Item/read.php", function (data) {
+                //returns the ItemIDs of a user's watched auctions
+                records = data['records'];
+
+                if ("records" in data) {
+
+                    //create all row elements and append to table
+                    for (i = 0; i < records.length; i++) {
+
+                        //retrieve itemID
+                        var itemID = records[i].ID;
+
+                        //retrieve itemID for all the seller's auctions
+                        $.getJSON("http://52.232.32.194/api/Item/read_one.php?ID=" + itemID, function (data) {
+                            var bids = 0;
+
+                            //src: https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format
+                            var t = data.AuctionEnd.split(/[- :]/);
+//                            var t = data.AuctionEnd.split(/[- :]/);
+                            var date = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+                            //create and inject element into the table
+                            var adminElement = fillAdminOverview(data, date, bids);
+                            $("#adminOverview").append(adminElement);
+                        });
+                    }
+                } else {
+                    //TODO: display appropriate message if none found!
+                    $("#tableLink").append("<p>There is not a single item auctioned...</p>");
+                }
+            });
+        }
+    });
+
+
+//Seller Table
+
+		function createSellerTable(){
+
+            var element =
+//                '<div class="outerTableContainer">' +
+                '<div class="dashboardTables col-lg-12 col-md-12">\n' +
+                '\t\t\t\t<button id="createAuctionBtn" type="button" class="btn btn-default" href="start-auction.html">Create Auction</button>\n' +
+                '\t\t\t\t<table class="table table-dark active table-bordered table-hover dt-responsive" >\n' +
+                '\t\t\t\t\t<caption class="text-center">Seller Auctions</caption>\n' +
+                '\t\t\t\t\t<thead>\n' +
+                '\t\t\t\t\t\t<tr>\n' +
+                '\t\t\t\t\t\t\t<th>Name</th>\n' +
+                '\t\t\t\t\t\t\t<th>Item Description</th>\n' +
+                '\t\t\t\t\t\t\t<th>Latest Bid</th>\n' +
+                '\t\t\t\t\t\t\t<th>Views</th>\n' +
+                '\t\t\t\t\t\t\t<th>Bids</th>\n' +
+                '\t\t\t\t\t\t\t<th>Reserve Price</th>\n' +
+                '\t\t\t\t\t\t\t<th>Auction End</th>\n' +
+                '\t\t\t\t\t\t</tr>\n' +
+                '\t\t\t\t\t</thead>\n' +
+                '\t\t\t\t\t<tbody class="sellerTable">\n' +
+                '\t\t\t\t\t</tbody>\n' +
+                '\t\t\t\t</table>\n' +
+//                '\t\t\t</div>' +
+                '</div>';
+
+            return element;
+        }
+
+        function fillSellerTable(auction, date, bids){
+
+		    var element =
+            ' <tr class= "click-row" href="auction.html?ID='+ auction.ID+'"> ' +
+            '\t<td>'+ auction.Name+'</td>\n' +
+            '\t<td>'+ auction.Description+'</td>\n' +
+            '\t<td>'+ (auction.LargestBid ? auction.LargestBid : auction.StartingPrice)/100 +'</td>\n' +
+            '\t<td>'+ auction.Views +'</td>\n' +
+            '\t<td>'+ bids +'</td>\n' +
+            '\t<td>'+ auction.ReservePrice +'</td>\n' +
+            '\t<td>'+ date.getFullYear() + ' / ' + (date.getMonth() + 1) + ' / ' + date.getDate()+' - '+date.getHours()+' '+date.getMinutes()+'</td>\n' +
+            '\t</tr>\n';
+
+		    return element;
+		}
+
+
+//Buyer Table
+        function createBuyerTable(){
+
+            var element =
+                '<div class="col-lg-12 col-md-12 dashboardTables">\n' +
+                '\t\t\t\t<table class="table table-dark active table-bordered table-hover dt-responsive">\n' +
+                '\t\t\t\t\t<caption class="text-center">Buyer Auctions</caption>\n' +
+                '\t\t\t\t\t<thead>\n' +
+                '\t\t\t\t\t\t<tr>\n' +
+                '\t\t\t\t\t\t\t<th>Product</th>\n' +
+                '\t\t\t\t\t\t\t<th>Item Description</th>\n' +
+                '\t\t\t\t\t\t\t<th>Price</th>\n' +
+                '\t\t\t\t\t\t\t<th>Views</th>\n' +
+                '\t\t\t\t\t\t\t<th>Auction End</th>\n' +
+                '\t\t\t\t\t\t\t<th>Rating</th>\n' +
+                '\t\t\t\t\t\t</tr>\n' +
+                '\t\t\t\t\t</thead>\n' +
+                '\t\t\t\t\t<tbody class="buyerTable">\n' +
+                '\t\t\t\t\t<!-- auctions are injected in here by method-->\n' +
+                '\t\t\t\t\t</tbody>\n' +
+                '\t\t\t\t\t<tfoot>\n' +
+                '\t\t\t\t\t</tfoot>\n' +
+                '\t\t\t\t</table>\n' +
+                '\t\t\t</div>';
+
+            return element;
+        }
+
+
+        //fill buyer table row with EXISTING RATING
+        function fillBuyerTableRating(auction, date){
+            var element =
+                ' <tr> ' +
+                '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Name+'</td>\n' +
+                '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Description+'</td>\n' +
+                '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ (auction.LargestBid ? auction.LargestBid : auction.StartingPrice)/100 +'</td>\n' +
+                '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Views +'</td>\n' +
+                '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ date.getFullYear() + ' / ' + (date.getMonth() + 1) + ' / ' + date.getDate()+' - '+date.getHours()+' '+date.getMinutes()+'</td>\n' +
+                '\t<td class="click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.SellerRating+'</td>' +
+                '</tr>';
+
+            return element;
+        }
+
+
+
+
+
+    //fill buyer table row with NO RATING
+        //TODO: add Status flag to rows indicating whether the auction is still going on or not
+		function fillBuyerTable(auction, date){
+            var element =
+				' <tr> ' +
+                    '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Name+'</td>\n' +
+                    '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Description+'</td>\n' +
+                    '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ (auction.LargestBid ? auction.LargestBid : auction.StartingPrice)/100 +'</td>\n' +
+                    '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ auction.Views +'</td>\n' +
+                    '\t<td class= "click-row" href="auction.html?ID='+ auction.ID+'">'+ date.getFullYear() + ' / ' + (date.getMonth() + 1) + ' / ' + date.getDate()+' - '+date.getHours()+' '+date.getMinutes()+'</td>\n' +
+                    //rating dropdown
+                    '<td >\n' +
+                    '    <select href="'+auction.ID+'" name="'+auction.SellerID+'" class = "select" >' +
+                    '            <option value="0">Give Rating</option>\n' +
+                    '            <option value="1">Horrible</option>\n' +
+                    '            <option value="2">Bad</option>\n' +
+                    '            <option value="3">Ok</option>\n' +
+                    '            <option value="4">Good</option>\n' +
+                    '            <option value="5">Excellent</option>\n' +
+                    '    </select>' +
+                    '</td>' +
+                '</tr>';
+
+			return element;
+		}
+
+    //give seller rating
+
+        //TODO: wait for Luke to confirm server is up and running so I can test the functionality
+        $(document).on("change","select", function(ev){
+            ev.preventDefault();
+
+            //get Rating, ItemID and SellerID
+            var rating = ev.target[ev.target.selectedIndex].value;
+            var itemID = $(this).attr('href');
+            var SellerID = $(this).attr('name');
+
+            $.post("http://52.232.32.194/api/Feedback/create.php?",
+                {"ToUserID": SellerID, "FromUserID": getUserID() ,"ItemID": itemID, "Rating":rating}
+            ).always(function (data) {
+
+                console.log(data);
+                console.log("I was in here");
+
+                //return to website
+                window.location.href = "dashboard.html?view=buyer";
+
+            });
+        });
+
+
+
+//Watchlist Table
+        function createWatchListTable(){
+
+		    var element =
+                '<div class="col-lg-12 col-md-12 dashboardTables">\n' +
+                '\t\t\t\t<table class="table table-dark active table-bordered table-hover dt-responsive">\n' +
+                '\t\t\t\t\t<caption class="text-center">Watchlist</caption>\n' +
+                '\t\t\t\t\t<thead>\n' +
+                '\t\t\t\t\t<tr>\n' +
+                '\t\t\t\t\t\t<th>Item Description</th>\n' +
+                '\t\t\t\t\t\t<th>Price</th>\n' +
+                '\t\t\t\t\t\t<th>Views</th>\n' +
+                '\t\t\t\t\t\t<th>Bids</th>\n' +
+                '\t\t\t\t\t\t<th>End Date</th>\n' +
+                '\t\t\t\t\t</tr>\n' +
+                '\t\t\t\t\t</thead>\n' +
+                '\t\t\t\t\t<tbody id="watchListTable">\n'+
+                '\t\t\t\t\t</tbody>\n' +
+                '\t\t\t\t\t<tfoot>\n' +
+                '\t\t\t\t\t</tfoot>\n' +
+                '\t\t\t\t</table>\n' +
+                '\t\t\t</div>';
+
+		    return element;
+		}
+
+		function fillWatchList(auction, date, bids){
+            var element =
+
+				' <tr class= "click-row" href="auction.html?ID='+ auction.ID+'"> ' +
+                '\t<td>'+ auction.Name+'</td>\n' +
+//                '\t<td>'+ (auction.LargestBid ? auction.LargestBid : auction.StartingPrice)/100 +'</td>\n' +
+                '\t<td>'+'£'+parseFloat((newAuctions.LargestBid ? newAuctions.LargestBid : newAuctions.StartingPrice)/100).toFixed(2) +'</td>\n' +
+                '\t<td>'+ auction.Views+'</td>\n' +
+                '\t<td>'+ bids +'</td>\n' +
+                '\t<td>' + date.getDate()+'/' + (date.getMonth() + 1) + '/'+ date.getFullYear() + ', '+date.getHours()+':'+(date.getMinutes()<10?'0':'') + date.getMinutes()+' </td>\n' +
+                '\t</tr>\n';
+
+            return element;
+        }
+
+
+//Admin overview
+    function createAdminOverview(){
+
+        var element =
+            '<div class="col-lg-12 col-md-12 dashboardTables">\n' +
+            '\t\t\t\t<table class="table table-dark active table-bordered table-hover dt-responsive">\n' +
+            '\t\t\t\t\t<caption class="text-center">Admin Overview</caption>\n' +
+            '\t\t\t\t\t\t<thead>\n' +
+            '\t\t\t\t\t\t<tr>\n' +
+            '\t\t\t\t\t\t\t<th>Auction Name</th>\n' +
+//            '\t\t\t\t\t\t\t<th>Item Description</th>\n' +
+            '\t\t\t\t\t\t\t<th>SellerID</th>\n' +
+            '\t\t\t\t\t\t\t<th>Seller Name</th>\n' +
+            '\t\t\t\t\t\t\t<th>Seller Rating</th>\n' +
+            '\t\t\t\t\t\t\t<th>Auction End</th>\n' +
+            '\t\t\t\t\t\t\t<th>Start Price</th>\n' +
+            '\t\t\t\t\t\t\t<th>Reserve Price</th>\n' +
+            '\t\t\t\t\t\t\t<th>Final Price</th>\n' +
+            '\t\t\t\t\t\t\t<th>Buyer ID</th>\n' +
+            '\t\t\t\t\t\t\t<th>Views</th>\n' +
+            '\t\t\t\t\t\t\t<th>Bids</th>\n' +
+            '\t\t\t\t\t\t\t<th>Action</th>\n' +
+            '\t\t\t\t\t\t</tr>\n' +
+            '\t\t\t\t\t\t</thead>\n' +
+            '\t\t\t\t\t\t<tbody id="adminOverview">\n'+
+            '\t\t\t\t\t\t</tbody>\n' +
+            '\t\t\t\t\t\t<tfoot>\n' +
+            '\t\t\t\t\t\t</tfoot>\n' +
+            '\t\t\t\t</table>\n' +
+            '\t\t\t</div>';
+
+        return element;
+    }
+
+    function deleteAuction(a)    {
+        console.log(a);
+
+        // Push change to bid table
+        $.post("http://52.232.32.194/api/Item/delete.php", {
+            "ID": a}, function (data) {
+            alert(data.message, {position: ['top-right'], autoClose: true, closeTime: 2000});
+        });
+    }
+
+    function fillAdminOverview(auction, date, bids){
+
+
+
+        // Formatting data for table
+        var rating, buyer;
+        if(auction.SellerRating == null)    {
+            rating = "No ratings";
+        }
+        else {
+            rating = auction.SellerRating;
+        }
+        if(auction.BuyerID == null) {
+            buyer = "Not sold";
+        }
+        else    {
+            buyer = auction.BuyerID;
+        }
+
+
+        var element =
+
+//            ' <tr class= "click-row" href="auction.html?ID='+ auction.ID+'"> ' +
+            '<tr>' +
+            '\t<td' + ' class="click-row" ' + 'href="auction.html?ID='+ auction.ID + '"' + '>'+ auction.Name + '</td>\n' +
+//            '\t<td>'+ auction.Description+'</td>\n' +
+            '\t<td>'+ auction.SellerID+'</td>\n' +
+            '\t<td>'+ auction.SellerName+'</td>\n' +
+            '\t<td>'+ rating+'</td>\n' +
+            '\t<td>' + date.getDate()+'/' + (date.getMonth() + 1) + '/'+ date.getFullYear() + ', '+date.getHours()+':'+(date.getMinutes()<10?'0':'') + date.getMinutes()+' </td>\n' +
+            '\t<td>'+'£'+ parseFloat(auction.StartingPrice / 100).toFixed(2) +'</td>\n' +
+            '\t<td>'+'£'+ parseFloat(auction.ReservePrice / 100).toFixed(2) +'</td>\n' +
+            '\t<td>'+'£'+ parseFloat(auction.FinalPrice / 100).toFixed(2) +'</td>\n' +
+            '\t<td>'+ buyer+'</td>\n' +
+            '\t<td>'+ auction.Views+'</td>\n' +
+            '\t<td>'+ bids+'</td>\n' +
+            '\t<td>'+ '<button id="delete-auc" onclick="deleteAuction(\'' + auction.ID + '\')">' + 'Delete' + '</button>' +'</td>\n' +
+            '\t</tr>\n';
+
+        return element;
+    }
+
+        //linking table rows to specific auctions
+		//TODO: test if table rows are correctly linked
+        $(document).on('click', ".clickable-row", function(){
+            location.href=$('.clickable-row').attr('href');
+        });
+        $(document).on('click', ".click-row", function(){
+            location.href=$('.click-row').attr('href');
+        });
+        $(document).on('click', ".watchList-row", function(){
+            location.href=$('.watchList-row').attr('href');
+        });
+
+
+</script>
+
+	<!---->
+
+<div class="footer-content">
+    <div class="container">
+        <div class="ftr-grids">
+            <div class="col-md-3 ftr-grid">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="user-profile.html">My profile</a></li>
+                    <li><a href="start-auction.html">Start auction</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+<!---->
+<div class="footer">
+    <div class="container">
+        <div class="copywrite">
+            <p>© 2018 | Made with ♥ at UCL | Theme by <a href="http://w3layouts.com">W3layouts</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

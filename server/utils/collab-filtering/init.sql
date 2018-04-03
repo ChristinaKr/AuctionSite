@@ -1,0 +1,1 @@
+load data infile 'sample.data' into table oso_user_ratings;
